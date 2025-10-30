@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ sweet.name }} | Sweet Spot</title>
+  <link rel="stylesheet" href="{% static 'testapp/css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* ... (Your existing styles for .sweet-detail-wrapper, .sweet-image-container, etc. remain here) ... */
+    .sweet-detail-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 1rem;
+      align-items: flex-start;
+    }
+    .sweet-image-container {
+      flex: 1 1 400px;
+      max-width: 450px;
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+    .sweet-image-container img {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+    }
+    .sweet-info-container {
+      flex: 1 1 450px;
+      max-width: 550px;
+    }
+    .sweet-info-container h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #A72703;
+    }
+    .sweet-info-container p.description {
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 1.5rem;
+    }
+    .price-display {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333; 
+      margin-bottom: 1.8rem;
+      transition: all 0.3s ease;
+    }
+
+    /* --- (START: STYLES FOR NEW UI) --- */
+
+    .selectors {
+      display: block; /* Stacks Weight and Quantity */
+      margin-bottom: 1.5rem;
+    }
+    
+    .selectors .selector-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    .selectors > div {
+      margin-bottom: 1.2rem; /* Space between sections */
+    }
+
+    /* Styles for Weight radio buttons */
+    .weight-selector {
+      display: flex;
+      gap: 0.5rem; 
+    }
+    .weight-selector input[type="radio"] {
+      display: none; /* Hide radio button */
+    }
+    .weight-selector label {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid #e0e0e0;
+      border-radius: 25px; /* Pill shape */
+      cursor: pointer;
+      background-color: #f9f9f9; 
+      color: #333;
+      transition: all 0.2s ease;
+    }
+    .weight-selector label:hover {
+      background-color: #f0f0f0;
+    }
+    .weight-selector input[type="radio"]:checked + label {
+      background-color: #333; /* Dark selected */
+      color: #fff; /* White text */
+      border-color: #333;
+    }
+
+    /* Styles for Quantity stepper */
+    .qty-selector {
+      display: inline-flex;
+      align-items: center;
+      border: none;
+      background-color: #f5f5f5;
+      border-radius: 25px; /* Pill shape */
+      overflow: hidden;
+    }
+
+    .qty-btn {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 0.6rem 1.1rem;
+      color: #555;
+      transition: background-color 0.2s;
+    }
+    .qty-btn:hover {
+      background-color: #e9e9e9;
+    }
+
+    #qtyInput {
+      width: 40px;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      background-color: transparent;
+      color: #333;
+      padding: 0.6rem 0;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    #qtyInput::-webkit-outer-spin-button,
+    #qtyInput::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Add to Cart button style */
+    .btn-order {
+      background-color: #333; 
+      color: white;
+      border: none;
+      padding: 0.8rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+      width: 100%;
+      max-width: 350px;
+    }
+    .btn-order:hover {
+      background-color: #555;
+      transform: scale(1.03);
+    }
+    /* --- (END: STYLES FOR NEW UI) --- */
+
+
+    @media (max-width: 768px) {
+      .sweet-detail-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+      .sweet-image-container img {
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>🍬 Sweet Spot</h1>
+    <div class="nav-right">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'sweet_list' %}">Sweets</a>
+    <a href="{% url 'cart_view' %}">
+        <i class="fas fa-shopping-cart"></i> Cart
+    </a>
+</div>
+  </nav>
+
+  <div class="sweet-detail-wrapper">
+    <div class="sweet-image-container">
+      <img src="{{ sweet.image.url }}" alt="{{ sweet.name }}">
+    </div>
+    <div class="sweet-info-container">
+      <h2>{{ sweet.name }}</h2>
+      <p class="description">{{ sweet.description }}</p>
+
+      <div class="price-display" id="priceDisplay">
+        </div>
+
+      <form action="{% url 'add_to_cart' sweet.id %}" method="POST">
+        {% csrf_token %}
+        <div class="selectors">
+      
+          <div>
+            <label class="selector-label" for="w250">WEIGHT</label>
+            <div class="weight-selector">
+              <input type="radio" id="w250" name="weight_multiplier" value="1" checked>
+              <label for="w250">250gm</label>
+              
+              <input type="radio" id="w500" name="weight_multiplier" value="2">
+              <label for="w500">500gm</label>
+              
+              <input type="radio"id="w1kg" name="weight_multiplier" value="4">
+              <label for="w1kg">1kg</label>
+            </div>
+          </div>
+      
+          <div>
+            <label class="selector-label" for="qtyInput">QUANTITY</label>
+            <div class="qty-selector">
+              <button type="button" class="qty-btn" id="qtyMinus" aria-label="Decrease quantity">-</button>
+              <input id="qtyInput" type="number" value="1" min="1" name="quantity" readonly>
+              <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          
+        </div>
+
+        <button type="submit" class="btn-order" id="orderBtn">ADD TO CART</button>
+      </form>
+     
+  <script>
+    // This basePrice is for 250gm (the base unit)
+    const basePrice = parseFloat("{{ sweet.price }}"); 
+    
+    const weightSelector = document.querySelector('.weight-selector'); 
+    const qtyInput = document.getElementById('qtyInput');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const qtyPlus = document.getElementById('qtyPlus');
+    const qtyMinus = document.getElementById('qtyMinus');
+
+    function updatePrice() {
+      // Find the currently checked radio button
+      const checkedWeightInput = document.querySelector('input[name="weight_multiplier"]:checked');
+      
+      // Get its value (the multiplier: 1, 2, or 4)
+      const weightFactor = parseFloat(checkedWeightInput.value) || 1;
+
+      const qty = parseInt(qtyInput.value) || 1; 
+
+      const newPrice = basePrice * weightFactor * qty;
+
+      priceDisplay.style.opacity = 0;
+      setTimeout(() => {
+        // Using "₹" symbol
+        priceDisplay.textContent = "₹" + newPrice.toFixed(2); 
+        priceDisplay.style.opacity = 1;
+      }, 150);
+    }
+
+    // --- Event Handlers for +/- buttons ---
+    qtyPlus.addEventListener('click', () => {
+      let currentQty = parseInt(qtyInput.value) || 1;
+      qtyInput.value = currentQty + 1;
+      updatePrice();
+    });
+
+    qtyMinus.addEventListener('click', () => {
+      let currentQty = parseInt(qtyInput.value) || 1;
+      if (currentQty > 1) { 
+        qtyInput.value = currentQty - 1;
+        updatePrice();
+      }
+    });
+
+    // Listen for a 'change' on the radio button container
+    weightSelector.addEventListener('change', updatePrice);
+
+    // --- THIS IS THE FIX ---
+    // Call on page load to set the initial price
+    updatePrice(); 
+    // --- END OF FIX ---
+</script>
+  </body>
+</html>

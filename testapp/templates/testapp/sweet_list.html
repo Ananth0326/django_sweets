@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Spot | Sweets</title>
+    <link rel="stylesheet" href="{% static 'testapp/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+    <!-- 🍭 Navbar -->
+    <nav class="navbar">
+    <h1>🍬 Sweet Spot</h1>
+    <div class="nav-right">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'sweet_list' %}">Sweets</a>
+    <a href="{% url 'cart_view' %}">
+        <i class="fas fa-shopping-cart"></i> Cart
+    </a>
+</div>
+</nav>
+
+    <!-- 🧁 Category Filter Bar -->
+    <div class="category-bar">
+    <a href="{% url 'sweet_list' %}" class="{% if not request.GET.category %}active{% endif %}">
+        All Sweets
+    </a>
+    <a href="{% url 'sweet_list' %}?category=dryfruit" class="{% if request.GET.category == 'dryfruit' %}active{% endif %}">
+        Dry Fruit Sweets
+    </a>
+    <a href="{% url 'sweet_list' %}?category=milk" class="{% if request.GET.category == 'milk' %}active{% endif %}">
+        Milk Sweets
+    </a>
+    <a href="{% url 'sweet_list' %}?category=ghee" class="{% if request.GET.category == 'ghee' %}active{% endif %}">
+        Ghee Sweets
+    </a>
+    <a href="{% url 'sweet_list' %}?category=ragi" class="{% if request.GET.category == 'ragi' %}active{% endif %}">
+        Ragi Sweets
+    </a>
+    <a href="{% url 'sweet_list' %}?category=burfi_halwa" class="{% if request.GET.category == 'burfi_halwa' %}active{% endif %}">
+        Burfi & Halwa
+    </a>
+    <a href="{% url 'sweet_list' %}?category=sugarfree" class="{% if request.GET.category == 'sugarfree' %}active{% endif %}">
+        Sugar Free
+    </a>
+</div>
+
+
+    <!-- 🍬 Header -->
+    <header>
+        {% if request.GET.category %}
+            {{ request.GET.category|title }} Sweets
+        {% else %}
+            All Sweets
+        {% endif %}
+    </header>
+
+    <!-- 🍫 Sweet List -->
+    <div class="container">
+        {% if sweets %}
+            {% for sweet in sweets %}
+                <div class="card">
+                    <img src="{{ sweet.image.url }}" alt="{{ sweet.name }}">
+                    <h3>{{ sweet.name }}</h3>
+                    <p>₹{{ sweet.price }}</p>
+                    <a href="{% url 'sweet_detail' sweet.id %}">
+                        <button>Order Now</button>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; color:#777; margin-top:40px;">No sweets found in this category 😔</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Python
+*.py[cod]
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Env / secrets
+.env
+venv/
+ENV/
+env/
+*.env
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+static/
+local_settings.py
+
+# IDEs / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store

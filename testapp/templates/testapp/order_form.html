@@ -1,0 +1,7 @@
+<h2>Order: {{ sweet.name }}</h2>
+<p>Selected Quantity: {{ quantity }} gm</p>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Place Order</button>
+</form>
