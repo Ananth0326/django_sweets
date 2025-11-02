@@ -23,4 +23,6 @@ urlpatterns = [
     
     # This is for the little cart number in the navbar
     path('api/get_cart_count/', views.get_cart_count_api, name='api_get_cart_count'),
+    # urls.py
+path('', include('testapp.urls')),       # Connects your app URLs
 ]
