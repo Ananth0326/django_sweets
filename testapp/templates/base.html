@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{% block title %}Sweet Spot{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="{% static 'testapp/css/style.css' %}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Toast notification -->
+    <div id="toast-message" class="toast-message">
+        <i class="fas fa-check-circle"></i> Item added to cart!
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="{% url 'home' %}" class="navbar-brand">🍬 Sweet Spot</a>
+        </div>
+        
+        <div class="navbar-center">
+            <form action="{% url 'sweet_list' %}" method="GET" class="search-form">
+                <button type="submit" class="search-button" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <input type="text" name="q" class="search-input" placeholder="Search for sweets..." value="{{ request.GET.q }}">
+            </form>
+        </div>
+        
+        <div class="navbar-right">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'sweet_list' %}">Sweets</a>
+            <a href="{% url 'cart_view' %}" class="nav-cart-link">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart</span>
+                <span id="cart-count" class="cart-count-badge" style="display: none;">0</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- ===================== -->
+    <!-- Global AJAX Cart Logic -->
+    <!-- ===================== -->
+    <script>
+        // --- GLOBAL AJAX ADD TO CART FUNCTION ---
+        async function ajaxAddToCart(form, sweetId) {
+            const formData = new FormData(form);
+            const csrfToken = formData.get('csrfmiddlewaretoken');
+
+            try {
+                const url = `/api/add_to_cart/${sweetId}/`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    updateCartCount(data.new_cart_count);
+                    showToastMessage();
+                } else {
+                    console.error('Error adding to cart:', data.message);
+                    alert('Could not add to cart. Please try again.');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('Something went wrong while adding to cart.');
+            }
+        }
+
+        // --- TOAST MESSAGE HANDLER ---
+        function showToastMessage() {
+            const toast = document.getElementById('toast-message');
+            if (toast) {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // --- UPDATE CART COUNT BADGE ---
+        function updateCartCount(count) {
+            const cartCountBadge = document.getElementById('cart-count');
+            if (cartCountBadge) {
+                if (count > 0) {
+                    cartCountBadge.textContent = count;
+                    cartCountBadge.style.display = 'flex';
+                } else {
+                    cartCountBadge.style.display = 'none';
+                }
+            }
+        }
+
+        // --- INITIAL CART COUNT FETCH ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch("/api/get_cart_count/");
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (data.count !== undefined) {
+                    updateCartCount(data.count);
+                }
+            } catch (error) {
+                console.error('Could not fetch cart count:', error);
+            }
+        });
+    </script>
+
+    {% block scripts %}
+    {% endblock %}
+
+</body>
+</html>

@@ -1,79 +1,75 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sweet Spot | Sweets</title>
-    <link rel="stylesheet" href="{% static 'testapp/css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <!-- 🍭 Navbar -->
-    <nav class="navbar">
-    <h1>🍬 Sweet Spot</h1>
-    <div class="nav-right">
-    <a href="{% url 'home' %}">Home</a>
-    <a href="{% url 'sweet_list' %}">Sweets</a>
-    <a href="{% url 'cart_view' %}">
-        <i class="fas fa-shopping-cart"></i> Cart
-    </a>
-</div>
-</nav>
+{% block title %}Our Sweets | Sweet Spot{% endblock %}
 
-    <!-- 🧁 Category Filter Bar -->
-    <div class="category-bar">
-    <a href="{% url 'sweet_list' %}" class="{% if not request.GET.category %}active{% endif %}">
-        All Sweets
-    </a>
-    <a href="{% url 'sweet_list' %}?category=dryfruit" class="{% if request.GET.category == 'dryfruit' %}active{% endif %}">
-        Dry Fruit Sweets
-    </a>
-    <a href="{% url 'sweet_list' %}?category=milk" class="{% if request.GET.category == 'milk' %}active{% endif %}">
-        Milk Sweets
-    </a>
-    <a href="{% url 'sweet_list' %}?category=ghee" class="{% if request.GET.category == 'ghee' %}active{% endif %}">
-        Ghee Sweets
-    </a>
-    <a href="{% url 'sweet_list' %}?category=ragi" class="{% if request.GET.category == 'ragi' %}active{% endif %}">
-        Ragi Sweets
-    </a>
-    <a href="{% url 'sweet_list' %}?category=burfi_halwa" class="{% if request.GET.category == 'burfi_halwa' %}active{% endif %}">
-        Burfi & Halwa
-    </a>
-    <a href="{% url 'sweet_list' %}?category=sugarfree" class="{% if request.GET.category == 'sugarfree' %}active{% endif %}">
-        Sugar Free
-    </a>
-</div>
+{% block content %}
+<div class="page-wrapper">
+    
+    <!-- Category Filter Bar -->
+    <div class="filter-container">
+        <a href="{% url 'sweet_list' %}" class="filter-btn {% if not request.GET.category %}active{% endif %}">
+            All Sweets
+        </a>
+        <a href="{% url 'sweet_list' %}?category=dryfruit" class="filter-btn {% if request.GET.category == 'dryfruit' %}active{% endif %}">
+            Dry Fruit Sweets
+        </a>
+        <a href="{% url 'sweet_list' %}?category=milk" class="filter-btn {% if request.GET.category == 'milk' %}active{% endif %}">
+            Milk Sweets
+        </a>
+        <a href="{% url 'sweet_list' %}?category=ghee" class="filter-btn {% if request.GET.category == 'ghee' %}active{% endif %}">
+            Ghee Sweets
+        </a>
+        <a href="{% url 'sweet_list' %}?category=ragi" class="filter-btn {% if request.GET.category == 'ragi' %}active{% endif %}">
+            Ragi Sweets
+        </a>
+        <a href="{% url 'sweet_list' %}?category=burfi_halwa" class="filter-btn {% if request.GET.category == 'burfi_halwa' %}active{% endif %}">
+            Burfi & Halwa
+        </a>
+        <a href="{% url 'sweet_list' %}?category=sugarfree" class="filter-btn {% if request.GET.category == 'sugarfree' %}active{% endif %}">
+            Sugar Free
+        </a>
+    </div>
 
-
-    <!-- 🍬 Header -->
-    <header>
-        {% if request.GET.category %}
+    <!-- Page Header (Shows category or search result) -->
+    <header class="page-header">
+        {% if search_query %}
+            Showing results for "{{ search_query }}"
+        {% elif request.GET.category %}
             {{ request.GET.category|title }} Sweets
         {% else %}
             All Sweets
         {% endif %}
     </header>
 
-    <!-- 🍫 Sweet List -->
-    <div class="container">
-        {% if sweets %}
-            {% for sweet in sweets %}
-                <div class="card">
+    <!-- Sweet Grid -->
+    <div class="sweet-grid">
+        
+        {% for sweet in sweets %}
+        <div class="sweet-card">
+            <a href="{% url 'sweet_detail' sweet.id %}" class="card-image-link">
+                <div class="card-image-container">
                     <img src="{{ sweet.image.url }}" alt="{{ sweet.name }}">
-                    <h3>{{ sweet.name }}</h3>
-                    <p>₹{{ sweet.price }}</p>
-                    <a href="{% url 'sweet_detail' sweet.id %}">
-                        <button>Order Now</button>
-                    </a>
                 </div>
-            {% endfor %}
-        {% else %}
-            <p style="text-align:center; color:#777; margin-top:40px;">No sweets found in this category 😔</p>
-        {% endif %}
-    </div>
+            </a>
+            <div class="card-info">
+                <h3>{{ sweet.name }}</h3>
+                <p class="description">{{ sweet.description|truncatewords:20 }}</p>
+                <p class="price">₹{{ sweet.price }} / 250gm</p>
+                <a href="{% url 'sweet_detail' sweet.id %}" class="btn btn-secondary">View Details</a>
+            </div>
+        </div>
+        {% empty %}
+            <p class="grid-empty-message">
+              No sweets found. 
+              {% if search_query %}
+                Try a different search?
+              {% else %}
+                Check back soon!
+              {% endif %}
+              😔
+            </p>
+        {% endfor %}
 
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}
